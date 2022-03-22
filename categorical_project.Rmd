@@ -1,7 +1,4 @@
 ---
-title: "범주형자료분석_프로젝트"
-author: "1689010 박유연"
-date: '2020 12 19 '
 output:
   html_document:
     df_print: paged
