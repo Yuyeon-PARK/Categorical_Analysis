@@ -1,11 +1,10 @@
-#¹üÁÖÇü ÇÃÁ§
+#ë²”ì£¼í˜• í”Œì 
 data=read.csv("data.csv",header=T)
 names(data)<-c("country","bachelor","internet","marriage","GDP","GNI")
 attach(data);head(data)
 
-Y: internet, X: bachelor, marriage, GDP
-- GNI¸¦ ÂÉ°³ÀÚ. 4°³ ±×·ìÀ¸·Î. 
-by World Bank Atlas method. GNI per capita (current US$, Atlas).2019³â ±âÁØ.
+# Y: internet, X: bachelor, marriage, GDP
+# by World Bank Atlas method. GNI per capita (current US$, Atlas).2019ë…„ ê¸°ì¤€.
 
 low-income(1): < $1026*10^10
 low middle income(2): $1026*10^10 ~ $3995*10^10
@@ -31,7 +30,7 @@ print(GNIclass)
 data<-cbind(data, GNIclass)
 head(data); attach(data)
 
-- internetÀ» 70À» ±âÁØÀ¸·Î, 70º¸´Ù Å©¸é 1, ¾Æ´Ï¸é 0
+# internetì„ 70ì„ ê¸°ì¤€ìœ¼ë¡œ, 70ë³´ë‹¤ í¬ë©´ 1, ì•„ë‹ˆë©´ 0
 
 int.class=rep(NA,87)
 
@@ -48,65 +47,58 @@ print(int.class)
 data<-cbind(data, int.class)
 head(data); attach(data)
 
-1) internet~bachelor: ±×³É linear fitting
+# 1) internet~bachelor: ê·¸ëƒ¥ linear fitting
 fit1<-lm(internet~bachelor)
 summary(fit1)
 
-2) internet~bachelor: logistic fitting
+# 2) internet~bachelor: logistic fitting
 fit2<-glm(int.class~bachelor, family=binomial)
 summary(fit2)
 
-3) internet~GNI: logistic fitting
+# 3) internet~GNI: logistic fitting
 fit3<-glm(int.class~factor(GNIclass), family=binomial)
 summary(fit3)
 
-4) internet~marriage: ±×³É linear fitting
+# 4) internet~marriage: linear fitting
 fit4<-lm(internet~marriage)
 summary(fit4)
 
-5) internet~marriage: logistic fitting
+# 5) internet~marriage: logistic fitting
 fit5<-glm(int.class~marriage, family=binomial)
 summary(fit5)
 
-6) internet~bachelor+GNI: logistic fitting
+# 6) internet~bachelor+GNI: logistic fitting
 fit6<-glm(int.class~bachelor+factor(GNIclass), family=binomial)
 summary(fit6)
 
-7) internet~bachelor+marriage: logistic fitting
+# 7) internet~bachelor+marriage: logistic fitting
 fit7<-glm(int.class~bachelor+marriage, family=binomial)
 summary(fit7)
 
-8) internet~bachelor+GNI+marriage: logistic fitting
+# 8) internet~bachelor+GNI+marriage: logistic fitting
 fit8<-glm(int.class~bachelor+factor(GNIclass)+marriage, family=binomial)
 summary(fit8)
 
-9) internet~bachelor+GNI+marriage+bachelor*GNI: logistic fitting
+# 9) internet~bachelor+GNI+marriage+bachelor*GNI: logistic fitting
 fit9<-glm(int.class~bachelor+factor(GNIclass)+marriage+I(bachelor*marriage), family=binomial)
 summary(fit9)
 
-------------À§¿¡°Å Ç¥·Î ¸¸µé¾î¼­ Á¤¸®ÇÏ±â----------------
 
-À¯ÀÇ¼º °ËÁ¤
-- ¸¸µé¾îµĞ Ç¥¿¡¼­ Deviance·Î °è»ê
-- Anova·Î °è»ê(ÇÊ¿ä¾øÁö ¾ÊÀ»,,±î,,?)
-
-¸ğÇü¼±ÅÃ
-backward stepwise from fit9
+# ëª¨í˜•ì„ íƒ
+# backward stepwise from fit9
 
 library(MASS)
 stepAIC(fit9)
 
 
-¸ğÇüÁø´Ü
-deviance ºñ±³->null model°ú ¼±ÅÃµÈ ¸ğµ¨ÀÇ deviance °è»ê.
+# ëª¨í˜•ì§„ë‹¨
+# deviance ë¹„êµ->null modelê³¼ ì„ íƒëœ ëª¨ë¸ì˜ deviance ê³„ì‚°.
 
-¾Æ Àá¸¸ ÀÌ°Å ¹«ÇÑ´ë ÃßÁ¤°ª? ¸Ó¼±ÀÏ..¿ÏÀüºĞ¸®ÀÎ°¡,,
-
-´ëÃ¼¿¬°áÇÔ¼ö1: ÇÁ·Îºø »ç¿ë
+# ëŒ€ì²´ì—°ê²°í•¨ìˆ˜1: í”„ë¡œë¹— ì‚¬ìš©
 fit10<-glm(int.class~bachelor+factor(GNIclass)+marriage+I(bachelor*marriage), family=binomial(link=probit))
 summary(fit10)
 
-´ëÃ¼¿¬°áÇÔ¼ö2: ¼±Çü¸ğÇü »ç¿ë
+# ëŒ€ì²´ì—°ê²°í•¨ìˆ˜2: ì„ í˜•ëª¨í˜• ì‚¬ìš©
 fit11<-lm(int.class~bachelor+factor(GNIclass)+marriage+I(bachelor*marriage))
 summary(fit11)
 
