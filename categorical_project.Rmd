@@ -1,0 +1,277 @@
+---
+title: "범주형자료분석_프로젝트"
+author: "1689010 박유연"
+date: '2020 12 19 '
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+## Data Manipulation
+
+```{r}
+data=read.csv("data.csv",header=T)
+names(data)<-c("country","bachelor","internet","marriage","GDP","GNI")
+attach(data);head(data)
+```
+
+GNI와 internet 사용 비율에 대해 범주형 자료로 코딩.
+
+```{r}
+GNIclass=rep(NA,87)
+
+for (i in 1:87){
+if (GNI[i]<1026*10^10){
+	GNIclass[i]=1
+} else if (GNI[i]<3995*10^10){
+	GNIclass[i]=2
+} else if (GNI[i]<12375*10^10){
+	GNIclass[i]=3
+} else {
+	GNIclass[i]=4
+}
+}
+
+print(GNIclass)
+
+data<-cbind(data, GNIclass)
+head(data); attach(data)
+```
+
+```{r}
+int.class=rep(NA,87)
+
+for (i in 1:87){
+if (internet[i]<70){
+	int.class[i]=1
+} else {
+	int.class[i]=0
+}
+}
+
+print(int.class)
+
+data<-cbind(data, int.class)
+head(data); attach(data)
+```
+```{r}
+cor(internet, bachelor)
+```
+
+### 각각의 변수에 대해 모델 fitting. <br>
+### Linear regression
+0) internet~1: linear fitting
+```{r}
+fit00<-lm(int.class~1)
+summary(fit00)
+```
+
+1) internet~bachelor: linear fitting
+```{r}
+fit11<-lm(int.class~bachelor)
+summary(fit11)
+```
+
+2) internet~GNI: linear fitting
+```{r}
+fit22<-lm(int.class~factor(GNIclass))
+summary(fit22)
+```
+
+3) internet~marriage: linear fitting
+```{r}
+fit33<-lm(int.class~marriage)
+summary(fit33)
+```
+
+4) internet~bachelor+GNI: linear fitting
+```{r}
+fit44<-lm(int.class~bachelor+factor(GNIclass))
+summary(fit44)
+```
+
+5) internet~bachelor+marriage: linear fitting
+```{r}
+fit55<-lm(int.class~bachelor+marriage)
+summary(fit55)
+```
+
+6) internet~bachelor+GNI+marriage: linear fitting
+```{r}
+fit66<-lm(int.class~bachelor+factor(GNIclass)+marriage)
+summary(fit66)
+```
+
+7) internet~bachelor+GNI+marriage*bachelor: linear fitting
+```{r}
+fit77<-lm(int.class~bachelor+factor(GNIclass)+marriage+I(bachelor*marriage))
+summary(fit77)
+```
+```{r}
+fitted(fit66)
+```
+
+
+#### stepwise backward selection
+```{r}
+library(MASS)
+stepAIC(fit77)
+```
+```{r}
+fit88<-lm(formula = int.class ~ marriage + I(bachelor * marriage))
+summary(fit88)
+```
+
+
+### Logistic regression
+0) internet~1: logistic fitting
+```{r}
+fit0<-glm(int.class~1, family=binomial)
+summary(fit0)
+```
+
+1) internet~bachelor: logistic fitting
+```{r}
+fit1<-glm(int.class~bachelor, family=binomial)
+summary(fit1)
+```
+
+```{r}
+library(car)
+Anova(fit1)
+```
+
+2) internet~GNI: logistic fitting
+```{r}
+fit2<-glm(int.class~factor(GNIclass), family=binomial)
+summary(fit2)
+```
+
+```{r}
+Anova(fit2)
+```
+
+3) internet~marriage: logistic fitting
+```{r}
+fit3<-glm(int.class~marriage, family=binomial)
+summary(fit3)
+```
+```{r}
+Anova(fit3)
+```
+
+4) internet~bachelor+GNI: logistic fitting
+```{r}
+fit4<-glm(int.class~bachelor+factor(GNIclass), family=binomial)
+summary(fit4)
+```
+
+```{r}
+Anova(fit4)
+```
+
+5) internet~bachelor+marriage: logistic fitting
+```{r}
+fit5<-glm(int.class~bachelor+marriage, family=binomial)
+summary(fit5)
+```
+```{r}
+Anova(fit5)
+```
+
+6) internet~bachelor+GNI+marriage: logistic fitting
+```{r}
+fit6<-glm(int.class~bachelor+factor(GNIclass)+marriage, family=binomial)
+summary(fit6)
+```
+```{r}
+Anova(fit6)
+```
+
+
+7) internet~bachelor+GNI+marriage+bachelor*GNI: logistic fitting
+```{r}
+fit7<-glm(int.class~bachelor+factor(GNIclass)+marriage+I(bachelor*marriage), family=binomial)
+summary(fit7)
+```
+```{r}
+Anova(fit7)
+```
+
+
+#### 준완전분리 모델에 대한 검정
+```{r}
+logLik(fit2)
+library(profileModel)
+confintModel(fit2, objective="ordinaryDeviance", method="zoom")
+```
+
+```{r}
+logLik(fit4)
+confintModel(fit4, objective="ordinaryDeviance", method="zoom")
+```
+
+
+```{r}
+logLik(fit6)
+confintModel(fit6, objective="ordinaryDeviance", method="zoom")
+```
+
+```{r}
+logLik(fit7)
+confintModel(fit7, objective="ordinaryDeviance", method="zoom")
+```
+```{r}
+plot(GNI,int.class)
+```
+
+```{r}
+plot(GNIclass,int.class)
+```
+
+
+
+
+#### stepwise backward selection
+```{r}
+library(MASS)
+stepAIC(fit7)
+```
+
+```{r}
+fit8<-glm(int.class ~ marriage + I(bachelor*marriage), family = binomial)
+summary(fit8)
+```
+```{r}
+Anova(fit8)
+```
+
+```{r}
+summary(fit6)
+```
+fit6와 fit7의 이탈도 통계량을 통한 차이 비교
+$$H0=두 \ 모형 \ 간 \ 차이 \ 없음$$
+```{r}
+1-pchisq(0.645, df=1)
+```
+p-value가 0.05보다 크므로 H0 기각하지 않는다. 따라서 두 모형이 큰 차이가 없다고 볼 수 있다.
+
+```{r}
+library(pROC)
+rocplot<-roc(int.class~fitted(fit6))
+plot.roc(rocplot, legacy.axes=T)
+auc(rocplot) 
+```
+
+### Probit model
+internet~bachelor+GNI+marriage: probit fitting
+```{r}
+fit.6<-glm(int.class~bachelor+factor(GNIclass)+marriage, family=binomial(link=probit))
+summary(fit.6)
+```
+```{r}
+rocplot.probit<-roc(int.class~fitted(fit.6))
+plot.roc(rocplot.probit, legacy.axes=T)
+auc(rocplot.probit) 
+```
